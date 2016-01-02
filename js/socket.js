@@ -16,6 +16,7 @@ function connectSocket(url) {
         heartbeat_start();
         $("#apikey").hide();
         $("#message-conf").hide();
+        $("#message-voice").hide();
         $("#con-status").show();
         $("#con-status").html('<p>Connected</p></p><img src="img/circle_green.png"/>');
         $("#auth-connect").hide();
@@ -56,13 +57,13 @@ function connectSocket(url) {
     };
 
     _socket.onerror = function (event) {
-        chrome.alarms.create("reconnectSocket", {periodInMinutes:0.5});
+        chrome.alarms.create("reconnectSocket", {periodInMinutes: 0.5});
         heartbeat_stop();
     };
 
     _socket.onclose = function (event) {
         if (conn) {
-            chrome.alarms.create("reconnectSocket", {periodInMinutes:0.5});
+            chrome.alarms.create("reconnectSocket", {periodInMinutes: 0.5});
             heartbeat_stop();
         }
     };
@@ -75,14 +76,14 @@ function disconnectSocket() {
 }
 
 function reconnectSocket() {
-    retry_timer = chrome.alarms.create("reconnectSocket", {periodInMinutes:1});
+    retry_timer = chrome.alarms.create("reconnectSocket", {periodInMinutes: 1});
     $.ajax({
         url: "https://slack.com/api/rtm.start",
         data: {
             token: auth.token
         },
-        success: function(data, status, jqxhr) {
-            if(data.ok) {
+        success: function (data, status, jqxhr) {
+            if (data.ok) {
                 userName = data.self.name;
                 userID = data.self.id;
                 prefs = data.self.prefs.highlight_words;
@@ -96,21 +97,21 @@ function reconnectSocket() {
 }
 
 function heartbeat_start() {
-    heartbeat_timer = chrome.alarms.create("heartbeat_check", {periodInMinutes:1});
+    heartbeat_timer = chrome.alarms.create("heartbeat_check", {periodInMinutes: 1});
 }
 
 function heartbeat_beat() {
     clearTimeout(heartbeat_timer);
-    heartbeat_timer = chrome.alarms.create("heartbeat_check", {periodInMinutes:1});
+    heartbeat_timer = chrome.alarms.create("heartbeat_check", {periodInMinutes: 1});
 }
 
 function heartbeat_check() {
-    defibrillate_timer = chrome.alarms.create("heartbeat_defibrillate", {periodInMinutes:0.5});
+    defibrillate_timer = chrome.alarms.create("heartbeat_defibrillate", {periodInMinutes: 0.5});
     _socket.send(JSON.stringify({id: ping_counter++, type: "ping"}));
 }
 
 function heartbeat_defibrillate() {
-    chrome.alarms.create("reconnectSocket", {periodInMinutes:1});
+    chrome.alarms.create("reconnectSocket", {periodInMinutes: 1});
 }
 
 function heartbeat_cancel_defibrillate() {
@@ -127,17 +128,24 @@ function readMessage(uid, messageText) {
         data: {
             token: auth.token
         },
-        success: function(data, status, jqxhr) {
-            if(data.ok) {
+        success: function (data, status, jqxhr) {
+            if (data.ok) {
                 var memCount = data.members.length;
-                for(var i = 0; i < memCount; i++ ) {
-                    if(data.members[i].id == uid && data.members[i].real_name != undefined) {
+                for (var i = 0; i < memCount; i++) {
+                    if (data.members[i].id == uid && data.members[i].real_name != undefined) {
                         var profileName = data.members[i].real_name;
                         if (!profileName) {
                             profileName = 'user';
                         }
                         messageText = profileName + ' says ' + messageText;
-                        chrome.tts.speak(messageText, {'rate' : 0.8, 'gender' : 'male', 'pitch' : 1, 'volume' : 1, 'enqueue' : true});
+                        var messageVoice = $('input[name=message-voice]:checked').val();
+                        chrome.tts.speak(messageText, {
+                            'rate': 0.8,
+                            'gender': messageVoice,
+                            'pitch': 1,
+                            'volume': 1,
+                            'enqueue': true
+                        });
                     }
                 }
             }
