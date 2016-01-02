@@ -1,0 +1,15 @@
+.box {
+    clear: both;
+    margin-left: 8em;
+    margin-top: 6em;
+}
+
+/*input.message-type {display: -webkit-box !important;}*/
+#message-conf{padding-top: 1em;}
+#message-label{padding-bottom: 1em;}
+
+.box input {
+    clear: both;
+    margin-bottom: 10px;
+}
+div.buttons{margin-top: 1em;}

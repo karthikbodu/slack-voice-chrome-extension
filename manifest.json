@@ -1,0 +1,12 @@
+{
+  "name": "Slack Voice!",
+  "description": "Reads out your incoming slack messages",
+  "version": "1.0",
+  "manifest_version": 2,
+  "permissions": [ "background", "storage", "tts", "alarms" ],
+  "app": {
+    "background": {
+      "scripts": ["js/main.js", "js/jquery.min.js", "js/socket.js", "js/slack.js"]
+    }
+  }
+}
