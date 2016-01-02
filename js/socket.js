@@ -1,7 +1,6 @@
 var _socket;
 var userID;
 var userName;
-var profileName = "user";
 var prefs;
 var conn;
 var retry_timer;
@@ -49,9 +48,7 @@ function connectSocket(url) {
 
         // Translate the message to voice
         if (message.type == 'message' && userID != message.user && matched == true) {
-            getSlackUser(message.user);
-            messageText = profileName + ' says ' + messageText;
-            chrome.tts.speak(messageText);
+            readMessage(message.user, messageText);
         }
         else if (message.type == 'pong') {
             heartbeat_cancel_defibrillate();
@@ -86,7 +83,6 @@ function reconnectSocket() {
         },
         success: function(data, status, jqxhr) {
             if(data.ok) {
-                console.log(data.self);
                 userName = data.self.name;
                 userID = data.self.id;
                 prefs = data.self.prefs.highlight_words;
@@ -125,7 +121,7 @@ function heartbeat_stop() {
     cleartTimeout(heartbeat_timer);
 }
 
-function getSlackUser(uid) {
+function readMessage(uid, messageText) {
     $.ajax({
         url: "https://slack.com/api/users.list",
         data: {
@@ -136,7 +132,12 @@ function getSlackUser(uid) {
                 var memCount = data.members.length;
                 for(var i = 0; i < memCount; i++ ) {
                     if(data.members[i].id == uid && data.members[i].real_name != undefined) {
-                        profileName = data.members[i].real_name;
+                        var profileName = data.members[i].real_name;
+                        if (!profileName) {
+                            profileName = 'user';
+                        }
+                        messageText = profileName + ' says ' + messageText;
+                        chrome.tts.speak(messageText, {'rate' : 0.8, 'gender' : 'male', 'pitch' : 1, 'volume' : 1, 'enqueue' : true});
                     }
                 }
             }
