@@ -10,15 +10,6 @@ $(document).ready(function() {
         }
         else {
             $("#api-error").html('');
-        }
-        var msgType = $('input[name=message-type]:checked').val();
-        if(msgType == undefined) {
-            $("#conf-error").html('<p style="color:red">Choose the message type</p>');
-        }
-        else {
-            $("#conf-error").html('');
-        }
-        if (msgType != undefined && authToken != '') {
             auth = {};
             auth.token = authToken;
             chrome.storage.local.set({'auth': JSON.stringify(auth)});
@@ -33,6 +24,7 @@ $(document).ready(function() {
         $("#auth-token").val("");
         $("#apikey").show();
         $("#message-conf").show();
+        $("#message-voice").show();
         $("#con-status").html("");
         $("#auth-connect").show();
         disconnectSocket();
